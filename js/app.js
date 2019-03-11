@@ -15,4 +15,167 @@ class UI {
     this.itemList = [];
     this.itemID = 0;
   }
+
+  submitBudgtForm(){
+     console.log('hello and good luck')
+     const value = this.budgetInput.value
+    if (value === ''|| value < 0){
+      this.budgetFeedback.classList.add('showItem')
+      this.budgetFeedback.innerHTML= '<p>value cannot be empty or negative</p>'
+      const self = this
+      setTimeout(function () {
+        self.budgetFeedback.classList.remove('showItem')
+      },4000)
+    }
+    else{
+      this.budgetAmount.textContent = value
+      this.budgetInput.value= ''
+      this.showBalance
+    }
+
+  }
+  showBalance(){
+    const expense = this.totalExpense()
+    const balance = parseInt(this.budgetAmount.textContent)- expense
+    this.balanceAmount.textContent = balance
+    if (balance < 0){
+      this.balance.classList.remove('showGreen', 'showBlack')
+      this.balance.classList.add('showRed')
+    }
+    else if (balance === 0){
+      this.balance.classList.remove('showRed', 'showGreen')
+      this.balance.classList.add('showBlack')
+    }
+    else if (balance < 0){
+      this.balance.classList.remove('showRed', 'showBlack')
+      this.balance.classList.add('showGreen')
+    }
+  }
+
+  totalExpense(){
+    let totalexpense =  0
+    if (this.expenseList.length>0){
+      for (var item in this.expenseList){
+        totalexpense += item.amount
+      }
+    }
+    this.expenseAmount.textcontent = total
+    return total  
+
+  }
+
+  submitExpenseForm(){
+    const expensevalue = this.expenseInput.value
+    const amountValue = this.amountInput.value
+    if (expensevalue === '' || amountValue === '' || expensevalue < 0 || amountValue <0 ){
+      this.expenseFeedback.classList.add('showItem')
+      this.expenseFeedback.innerHTML = '<p>Values cannot be empty or negative </p>'
+      const self = this
+      setTimeout(function (){
+        self.expenseFeedback.classList.remove('showItem')
+      } ,4000)
+    }
+    else{
+      let amount = parseInt(amountValue)
+      this.amountInput.value = ''
+      this.expenseInput.value = ''
+
+      let expense = {
+        id: this.itemID,
+        title:expensevalue,
+        amount:amount,
+      }
+      this.itemList.push(expense)
+      this.itemID++
+      this.addExpense(expense)
+    }
+  }
+
+  addExpense(expense){
+    const div = document.createElement('div')
+    div.classList.add('Expense')
+    div.innerHTML= '  <div class="expense-item d-flex justify-content-between align-items-baseline">\n' +
+        '\n' +
+        '         <h6 class="expense-title mb-0 text-uppercase list-item">{expense.title}</h6>\n' +
+        '         <h5 class="expense-amount mb-0 list-item">-{expense.amount}</h5>\n' +
+        '\n' +
+        '         <div class="expense-icons list-item">\n' +
+        '\n' +
+        '          <a href="#" class="edit-icon mx-2" data-id="${expense.id}">\n' +
+        '           <i class="fas fa-edit"></i>\n' +
+        '          </a>\n' +
+        '          <a href="#" class="delete-icon" data-id="${expense.id}">\n' +
+        '           <i class="fas fa-trash"></i>\n' +
+        '          </a>\n' +
+        '         </div>\n' +
+        '        </div>\n' +
+        '\n' +
+        '       </div> -->'
+    this.expenseList.appendChild(div)
+    this.showBalance()
+  }
+
+  editExpense(element){
+    let id = parseInt(element.dataset.id)
+    let parent = element.parentElement.parentElement.parentElement
+    this.expenseList.removeChild(parent)
+
+    let expense =  this.itemList.filter(function (item) {
+      return item.id === id
+    })
+    this.expenseInput.vaule = expense[0].title
+    this.amountInput.value = expense[0].amount
+
+    let tempList =  this.itemList.filter(function (item) {
+      return item.id != id
+    })
+    this.itemList = tempList
+    this.showBalance()
+  }
+  deleteExpense(element){
+    let id = parseInt(element.dataset.id)
+    let parent = element.parentElement.parentElement.parentElement
+    this.expenseList.removeChild(parent)
+    let expense =  this.itemList.filter(function (item) {
+      return item.id === id
+    })
+    let tempList =  this.itemList.filter(function (item) {
+      return item.id != id
+    })
+    this.itemList = tempList
+    this.showBalance()
+  }
 }
+
+
+function eventListeners(){
+const budgetForm = document.getElementById('budget-form')
+const expenseForm = document.getElementById('expense-form')
+const expenseList= document.getElementById('expense-list')
+
+  const ui = new UI()
+
+  budgetForm.addEventListener('submit', function (event) {
+    event.preventDefault()
+    ui.submitBudgtForm()
+  })
+
+  expenseForm.addEventListener('submit', function (event) {
+    event.preventDefault()
+    ui.submitExpenseForm()
+
+  })
+
+  expenseList.addEventListener('click', function (event) {
+    if(event.target.parentElement.classList.contains('edit-icon')){
+      ui.editExpense(event.target.parentElement)
+    }
+    if(event.target.parentElement.classList.contains('delete-icon')){
+      ui.deleteExpense(event.target.parentElement)
+    }
+  })
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  eventListeners();
+})
